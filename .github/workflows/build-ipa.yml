@@ -1,0 +1,53 @@
+name: Build unsigned IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - "GothamPocket/**"
+      - "Support/**"
+      - "project.yml"
+      - "scripts/build-ipa.sh"
+      - ".github/workflows/build-ipa.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build on macOS
+    runs-on: macos-15
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Build and package
+        run: |
+          chmod +x scripts/build-ipa.sh
+          ./scripts/build-ipa.sh
+
+      - name: Show artifact
+        run: |
+          ls -lh dist/
+          shasum -a 256 dist/*.ipa
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: GothamPocket-unsigned-ipa
+          path: |
+            dist/*.ipa
+            dist/*.sha256
+          if-no-files-found: error
+          retention-days: 30

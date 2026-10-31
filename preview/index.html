@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#06080f">
+<title>哥谭口袋 · Gotham Pocket</title>
+<style>
+  :root{
+    --ink:#06080f;
+    --night:#0b1220;
+    --paper:#f6eedc;
+    --bat:#f4c84b;
+    --bat2:#6f9fc9;
+    --joker:#8be05a;
+    --red:#df4f62;
+    --purple:#4a2068;
+    --accent:var(--bat);
+    --accent2:var(--bat2);
+    --sky1:#07111e;
+    --sky2:#10273a;
+    --sky3:#05070d;
+    --panel:#0d1726;
+    --font:-apple-system,BlinkMacSystemFont,"SF Pro Rounded","Segoe UI Variable Display","Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;background:#03050a;color:#fff;font-family:var(--font);-webkit-font-smoothing:antialiased}
+  body{
+    min-height:100dvh;
+    background:
+      radial-gradient(900px 700px at 18% 20%, rgba(244,200,75,.10), transparent 60%),
+      radial-gradient(900px 700px at 82% 58%, rgba(139,224,90,.08), transparent 60%),
+      radial-gradient(1200px 900px at 50% 110%, rgba(74,32,104,.28), transparent 65%),
+      #03050a;
+  }
+  button{font:inherit;color:inherit}
+  .page{
+    min-height:100dvh;
+    display:grid;
+    grid-template-columns:minmax(340px,470px) auto;
+    gap:clamp(32px,6vw,96px);
+    align-items:center;
+    justify-content:center;
+    padding:48px clamp(28px,6vw,96px);
+  }
+  .intro{max-width:470px;position:relative;z-index:2}
+  .kicker{
+    display:inline-flex;align-items:center;gap:9px;
+    font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.28em;
+    color:var(--bat);text-transform:uppercase;
+    padding:7px 11px;border:1px solid rgba(244,200,75,.32);border-radius:999px;
+    background:rgba(244,200,75,.06);
+  }
+  .kicker::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--bat);box-shadow:0 0 12px var(--bat)}
+  .intro h1{
+    margin:22px 0 8px;
+    font-size:clamp(48px,6.4vw,82px);
+    line-height:1.02;letter-spacing:-.055em;font-weight:950;
+  }
+  .intro h1 span{display:block;color:var(--bat)}
+  .intro .en{
+    font-family:var(--mono);font-size:11px;letter-spacing:.34em;color:rgba(255,255,255,.42);
+    margin-bottom:24px;
+  }
+  .intro p{font-size:15px;line-height:1.85;color:rgba(255,255,255,.62);margin:0 0 18px;max-width:410px}
+  .intro p strong{color:rgba(255,255,255,.9);font-weight:600}
+  .features{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 28px}
+  .features span{
+    font-size:11px;color:rgba(255,255,255,.6);padding:7px 10px;border-radius:8px;
+    border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.035);
+  }
+  .preview-buttons{display:flex;gap:10px;flex-wrap:wrap}
+  .preview-buttons button{
+    appearance:none;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.05);
+    border-radius:12px;padding:11px 16px;font-size:12px;font-weight:700;letter-spacing:.02em;
+    cursor:pointer;transition:transform .18s ease,background .18s ease,border-color .18s ease;
+  }
+  .preview-buttons button:hover{transform:translateY(-2px);background:rgba(255,255,255,.09)}
+  .preview-buttons button.bat{border-color:rgba(244,200,75,.4);color:var(--bat);background:rgba(244,200,75,.08)}
+  .preview-buttons button.joke{border-color:rgba(139,224,90,.4);color:var(--joker);background:rgba(139,224,90,.08)}
+  .footnote{margin-top:26px;font-size:10px;line-height:1.7;color:rgba(255,255,255,.3);font-family:var(--mono);letter-spacing:.02em}
+  .device{
+    position:relative;width:390px;height:844px;flex:0 0 auto;
+    border-radius:54px;padding:9px;
+    background:linear-gradient(145deg,#2a3444,#080b12 38%,#1c2431 72%,#090c12);
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,.12),
+      0 42px 120px rgba(0,0,0,.72),
+      0 0 100px rgba(244,200,75,.06);
+  }
+  .screen{
+    position:relative;width:100%;height:100%;overflow:hidden;border-radius:46px;
+    background:var(--sky3);display:flex;flex-direction:column;
+    --accent:var(--bat);--accent2:var(--bat2);
+    transition:background .45s ease;
+  }
+  .screen[data-companion="joker"]{--accent:var(--joker);--accent2:var(--red)}
+  .sky{
+    position:absolute;inset:0;z-index:0;overflow:hidden;
+    background:linear-gradient(180deg,var(--sky1) 0%,var(--sky2) 55%,var(--sky3) 100%);
+    transition:background .5s ease;
+  }
+  .screen[data-companion="joker"] .sky{
+    background:linear-gradient(180deg,#170a22 0%,#2a1240 55%,#08060d 100%);
+  }
+  .stars,.rain,.vignette,.skyline,.moon,.signal,.joker-glow,.ha{position:absolute;pointer-events:none}
+  .stars{inset:0}
+  .star{position:absolute;border-radius:50%;background:#fff;animation:twinkle 3.8s ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:.18;transform:scale(.8)}50%{opacity:.62;transform:scale(1)}}
+  .moon{
+    right:26px;top:104px;width:54px;height:54px;border-radius:50%;
+    background:radial-gradient(circle at 34% 30%,#fff9df,#d8cfb4 62%,#b3a98f);
+    box-shadow:0 0 36px rgba(255,246,205,.28),0 0 90px rgba(255,246,205,.12);
+    opacity:.92;transition:opacity .4s ease;
+  }
+  .moon::after,.moon::before{content:"";position:absolute;border-radius:50%;background:rgba(157,146,119,.38)}
+  .moon::before{width:9px;height:7px;left:12px;top:16px}
+  .moon::after{width:12px;height:10px;left:30px;top:33px}
+  .screen[data-companion="joker"] .moon{opacity:.32}
+  .signal{
+    left:22px;right:auto;top:178px;width:78px;height:78px;border-radius:50%;
+    display:grid;place-items:center;
+    background:radial-gradient(circle at 44% 38%,#fff4bf,#f4c84b 66%,#c99a2e);
+    box-shadow:0 0 0 1px rgba(244,200,75,.55),0 0 34px rgba(244,200,75,.42),0 0 96px rgba(244,200,75,.22);
+    transition:opacity .35s ease,transform .35s ease;
+  }
+  .signal svg{width:56px;height:34px;color:#0a0e16;filter:drop-shadow(0 1px 0 rgba(255,255,255,.18))}
+  .signal::before{
+    content:"";position:absolute;width:220px;height:300px;top:40px;left:50%;
+    transform:translateX(-58%);
+    background:linear-gradient(180deg,rgba(244,200,75,.14),rgba(244,200,75,.01) 68%,transparent);
+    clip-path:polygon(38% 0,62% 0,100% 100%,0 100%);
+    z-index:-1;
+  }
+  .screen[data-companion="joker"] .signal{opacity:0;transform:scale(.7)}
+  .joker-glow{
+    right:-30px;top:74px;width:300px;height:300px;border-radius:50%;
+    background:radial-gradient(circle,rgba(139,224,90,.17),rgba(74,32,104,.18) 45%,transparent 70%);
+    opacity:0;transition:opacity .45s ease;
+  }
+  .screen[data-companion="joker"] .joker-glow{opacity:1}
+  .ha{
+    font-weight:950;color:rgba(139,224,90,.15);letter-spacing:-.06em;
+    font-size:62px;line-height:1;transform:rotate(-11deg);opacity:0;transition:opacity .45s ease;
+    text-shadow:0 0 24px rgba(139,224,90,.18);
+  }
+  .screen[data-companion="joker"] .ha{opacity:1}
+  .ha1{left:34px;top:128px}
+  .ha2{left:124px;top:196px;font-size:30px;transform:rotate(8deg);color:rgba(139,224,90,.11)}
+  .ha3{right:42px;top:248px;font-size:17px;transform:rotate(-6deg);color:rgba(139,224,90,.10)}
+  .skyline{left:0;right:0;bottom:0;width:100%;height:308px;opacity:.98}
+  .skyline .far{fill:#0b1421;opacity:.82}
+  .skyline .near{fill:#03060b}
+  .skyline .trim{fill:#34445e;opacity:.25}
+  .skyline .win{fill:var(--accent);opacity:.22}
+  .rain{inset:-40px 0 0}
+  .rain i{position:absolute;top:-80px;width:1px;height:17px;background:linear-gradient(180deg,transparent,rgba(191,216,242,.24));transform:rotate(7deg);animation:rainfall linear infinite}
+  @keyframes rainfall{to{transform:translate3d(-24px,980px,0) rotate(7deg)}}
+  .screen.rain-off .rain{display:none}
+  .vignette{
+    inset:0;
+    background:
+      radial-gradient(120% 90% at 50% 12%,transparent 44%,rgba(3,5,10,.55) 88%),
+      linear-gradient(180deg,transparent 58%,rgba(3,5,10,.72) 100%);
+  }
+  .statusbar{
+    position:relative;z-index:8;flex:0 0 44px;height:44px;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:4px 22px 0;font-size:11.5px;font-weight:650;letter-spacing:.01em;
+  }
+  .statusbar .icons{display:flex;align-items:center;gap:6px;opacity:.92}
+  .notch{
+    position:absolute;z-index:9;top:9px;left:50%;transform:translateX(-50%);
+    width:92px;height:25px;border-radius:999px;background:#000;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);
+  }
+  .app{
+    position:relative;z-index:3;flex:1;min-height:0;display:flex;flex-direction:column;
+    padding:0 16px 8px;
+  }
+  .header{
+    flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:4px 2px 8px;
+  }
+  .badge{
+    width:42px;height:42px;border-radius:13px;flex:0 0 auto;
+    display:grid;place-items:center;
+    background:rgba(0,0,0,.34);border:1px solid color-mix(in srgb,var(--accent) 42%,transparent);
+    box-shadow:0 0 18px color-mix(in srgb,var(--accent) 22%,transparent);
+    color:var(--accent);transition:border-color .35s ease,color .35s ease;
+  }
+  .badge svg{width:25px;height:15px;fill:currentColor;display:none}
+  .badge .ha-badge{display:none;font-size:15px;font-weight:950;transform:rotate(-8deg);color:var(--joker)}
+  .screen[data-companion="batman"] .badge svg{display:block}
+  .screen[data-companion="joker"] .badge .ha-badge{display:block}
+  .title-block{min-width:0;line-height:1}
+  .eyebrow{
+    font-family:var(--mono);font-size:7.5px;font-weight:700;letter-spacing:.30em;
+    color:color-mix(in srgb,var(--accent) 90%,white);margin-bottom:4px;
+  }
+  .title{font-size:24px;font-weight:950;letter-spacing:-.04em;margin:0}
+  .tagline{font-size:8.5px;font-weight:500;color:rgba(255,255,255,.4);margin-top:4px}
+  .gear{
+    width:34px;height:34px;border-radius:50%;flex:0 0 auto;
+    display:grid;place-items:center;border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.055);cursor:pointer;
+    transition:background .2s ease,transform .2s ease;
+  }
+  .gear:hover{background:rgba(255,255,255,.1)}
+  .gear:active{transform:scale(.94)}
+  .gear svg{width:15px;height:15px;fill:rgba(255,255,255,.82)}
+  .switch-pet{
+    margin-left:auto;display:flex;align-items:center;gap:5px;flex:0 0 auto;
+    height:34px;padding:0 10px;border-radius:999px;
+    border:1px solid color-mix(in srgb,var(--accent) 28%,transparent);
+    background:rgba(255,255,255,.055);color:var(--accent);
+    font-size:9px;font-weight:800;letter-spacing:.01em;cursor:pointer;
+    transition:background .2s ease,transform .2s ease,color .35s ease,border-color .35s ease;
+  }
+  .switch-pet:hover{background:rgba(255,255,255,.1)}
+  .switch-pet:active{transform:scale(.95)}
+  .switch-pet .loop{font-size:12px;line-height:1}
+  .stage{position:relative;flex:1;min-height:0;display:flex;flex-direction:column}
+  .speech-wrap{position:absolute;left:0;right:0;bottom:383px;z-index:4;display:flex;justify-content:center;padding-top:2px;pointer-events:none}
+  .speech{
+    position:relative;max-width:310px;min-width:210px;
+    background:var(--paper);color:var(--ink);
+    border:2.5px solid var(--ink);border-radius:15px;
+    box-shadow:4px 5px 0 rgba(0,0,0,.55),0 12px 34px rgba(0,0,0,.28);
+    padding:11px 14px 21px;transform:rotate(-.7deg);
+    transition:background .35s ease;
+  }
+  .speech::after{
+    content:"";position:absolute;left:38px;bottom:-13px;width:18px;height:18px;
+    background:var(--paper);border-left:2.5px solid var(--ink);border-bottom:2.5px solid var(--ink);
+    transform:rotate(-45deg);box-shadow:-3px 3px 0 rgba(0,0,0,.08);
+  }
+  .bubble-label{
+    display:inline-block;font-family:var(--mono);font-size:8px;font-weight:800;letter-spacing:.14em;
+    color:var(--ink);background:var(--accent);border-radius:999px;padding:3px 7px;margin-bottom:6px;
+    transition:background .35s ease;
+  }
+  .bubble-text{font-size:14.5px;line-height:1.42;font-weight:650;letter-spacing:-.01em;min-height:20px}
+  .speech.pop{animation:bubblepop .32s cubic-bezier(.2,.9,.25,1.3)}
+  @keyframes bubblepop{0%{transform:rotate(-.7deg) scale(.9);opacity:.3}100%{transform:rotate(-.7deg) scale(1);opacity:1}}
+  .pet-area{position:relative;flex:1;min-height:0}
+  .ledge{
+    position:absolute;left:50%;bottom:20px;transform:translateX(-50%);
+    width:288px;height:14px;border-radius:999px;
+    background:linear-gradient(180deg,#25324a,#080c14);
+    border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);
+    box-shadow:0 0 22px color-mix(in srgb,var(--accent) 20%,transparent);
+    z-index:1;
+  }
+  .pet-shadow{
+    position:absolute;left:50%;bottom:23px;transform:translateX(-50%);
+    width:276px;height:46px;border-radius:50%;
+    background:radial-gradient(ellipse,color-mix(in srgb,var(--accent) 27%,transparent),transparent 68%);
+    filter:blur(9px);z-index:0;
+  }
+  .pet{
+    position:absolute;left:50%;bottom:28px;width:260px;height:325px;margin-left:-130px;
+    z-index:3;touch-action:none;cursor:grab;user-select:none;outline:none;
+    transition:transform .5s cubic-bezier(.2,1.4,.4,1);
+  }
+  .pet:focus-visible{filter:drop-shadow(0 0 0 3px var(--accent))}
+  .pet.dragging{cursor:grabbing;transition:none}
+  .pet-bob{width:100%;height:100%;animation:bob 3.4s ease-in-out infinite;transform-origin:50% 92%}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-.3deg)}50%{transform:translateY(-6px) rotate(.5deg)}}
+  .character{position:absolute;inset:0;width:100%;height:100%;opacity:0;transform:scale(.82) translateY(8px);transition:opacity .3s ease,transform .4s cubic-bezier(.2,1.3,.35,1);filter:drop-shadow(0 18px 18px rgba(0,0,0,.35))}
+  .character.active{opacity:1;transform:scale(1) translateY(0)}
+  .eye-open{animation:eyeopen 4.8s infinite}
+  .eye-closed{opacity:0;animation:eyeclosed 4.8s infinite}
+  @keyframes eyeopen{0%,93.5%,100%{opacity:1}94.5%,97%{opacity:0}}
+  @keyframes eyeclosed{0%,93.5%,100%{opacity:0}94.5%,97%{opacity:1}}
+  .fx{position:absolute;inset:0;z-index:5;pointer-events:none;overflow:visible}
+  .particle{position:absolute;left:50%;top:58%;font-size:16px;font-weight:900;line-height:1;will-change:transform,opacity}
+  .pow{
+    position:absolute;left:50%;top:47%;transform:translate(-50%,-50%) rotate(-7deg) scale(.3);
+    padding:8px 13px;border:2.5px solid var(--ink);
+    background:var(--accent);color:var(--ink);font-size:17px;font-weight:950;letter-spacing:-.03em;
+    clip-path:polygon(50% 0%,61% 20%,82% 8%,80% 33%,100% 45%,82% 60%,92% 84%,68% 78%,56% 100%,43% 80%,18% 91%,24% 65%,0 52%,20% 38%,15% 14%,39% 22%);
+    display:grid;place-items:center;width:94px;height:74px;
+    animation:powpop .9s cubic-bezier(.16,1.2,.3,1) forwards;
+  }
+  @keyframes powpop{
+    0%{transform:translate(-50%,-50%) rotate(-7deg) scale(.2);opacity:0}
+    16%{transform:translate(-50%,-50%) rotate(3deg) scale(1.1);opacity:1}
+    28%{transform:translate(-50%,-50%) rotate(-3deg) scale(1);opacity:1}
+    72%{opacity:1}
+    100%{transform:translate(-50%,-58%) rotate(-6deg) scale(1.04);opacity:0}
+  }
+  .deck{
+    position:relative;z-index:6;flex:0 0 auto;border-radius:27px;padding:14px;
+    background:linear-gradient(150deg,rgba(20,33,53,.90),rgba(9,14,24,.94));
+    border:1px solid transparent;
+    background-clip:padding-box;
+    box-shadow:0 18px 48px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.06);
+    backdrop-filter:blur(18px);
+    transition:border-color .35s ease;
+  }
+  .deck::before{
+    content:"";position:absolute;inset:0;border-radius:27px;padding:1px;
+    background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 28%,transparent),transparent 35%,transparent 68%,color-mix(in srgb,var(--accent) 10%,transparent));
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;
+    transition:background .35s ease;
+  }
+  .status-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+  .status-left{flex:1;min-width:0}
+  .name-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);flex:0 0 auto}
+  .pet-name{font-size:17px;font-weight:950;letter-spacing:-.02em}
+  .mood-text{font-size:9.5px;font-weight:600;color:rgba(255,255,255,.45);white-space:nowrap}
+  .mood-score{font-family:var(--mono);font-size:9.5px;font-weight:700;color:color-mix(in srgb,var(--accent) 75%,transparent)}
+  .moodbar{height:6px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+  .moodfill{height:100%;width:58%;border-radius:999px;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 55%,transparent),var(--accent));box-shadow:0 0 8px color-mix(in srgb,var(--accent) 45%,transparent);transition:width .5s cubic-bezier(.2,.8,.2,1),background .35s ease}
+  .actions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .action{
+    appearance:none;border:1px solid color-mix(in srgb,var(--accent) 20%,transparent);
+    background:color-mix(in srgb,var(--accent) 10%,transparent);
+    border-radius:15px;padding:8px 4px 7px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    color:var(--accent);transition:transform .16s ease,background .16s ease;
+  }
+  .action:hover{background:color-mix(in srgb,var(--accent) 17%,transparent)}
+  .action:active{transform:scale(.95)}
+  .action .ico{font-size:17px;line-height:1.1;height:21px;display:grid;place-items:center;filter:drop-shadow(0 2px 5px rgba(0,0,0,.25))}
+  .action .lbl{font-size:12px;font-weight:800;letter-spacing:-.01em}
+  .action .sub{font-size:8.5px;font-weight:500;color:rgba(255,255,255,.38);white-space:nowrap}
+  .hint{margin:8px 0 0;text-align:center;font-size:8.5px;font-weight:500;letter-spacing:.02em;color:rgba(255,255,255,.30)}
+  .sheet-layer{position:absolute;inset:0;z-index:20;display:none}
+  .sheet-layer.open{display:block}
+  .sheet-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.56);backdrop-filter:blur(3px);animation:fade .2s ease}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  .sheet{
+    position:absolute;left:8px;right:8px;bottom:8px;border-radius:28px;
+    background:#0c1420;border:1px solid rgba(255,255,255,.10);
+    padding:18px 18px 16px;box-shadow:0 -24px 70px rgba(0,0,0,.55);
+    animation:slideup .28s cubic-bezier(.2,.9,.3,1);
+  }
+  @keyframes slideup{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .sheet-head h2{font-size:17px;margin:0;font-weight:900;letter-spacing:-.02em}
+  .sheet-close{border:0;background:rgba(255,255,255,.08);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px}
+  .sheet-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px}
+  .switch{width:42px;height:24px;border-radius:999px;border:0;background:rgba(255,255,255,.14);position:relative;cursor:pointer;transition:background .2s ease}
+  .switch::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s ease}
+  .switch.on{background:var(--accent)}
+  .switch.on::after{transform:translateX(18px)}
+  .sheet-note{font-size:9.5px;line-height:1.65;color:rgba(255,255,255,.35);margin:12px 0 0}
+  .reset{width:100%;height:42px;margin-top:12px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:12px;border:1px solid rgba(223,79,98,.3);background:rgba(223,79,98,.08);color:#ff8494;font-size:12px;font-weight:700;cursor:pointer}
+  @media (max-width:900px){
+    body{background:#03050a}
+    .page{display:block;padding:0;min-height:100dvh}
+    .intro{display:none}
+    .device{width:100%;height:100dvh;padding:0;border-radius:0;box-shadow:none;background:#000}
+    .screen{border-radius:0}
+    .notch{display:none}
+  }
+  @media (max-height:760px) and (max-width:900px){
+    .speech{max-width:270px;padding:8px 12px 18px}
+    .bubble-text{font-size:12.5px}
+    .speech-wrap{bottom:300px}
+    .pet{transform-origin:50% 100%;width:200px;height:250px;margin-left:-100px;bottom:24px}
+    .ledge{width:232px}
+    .pet-shadow{width:220px}
+    .deck{padding:11px 12px}
+    .hint{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <aside class="intro">
+    <div class="kicker">A tiny Gotham on your iPhone</div>
+    <h1>哥谭<span>口袋</span></h1>
+    <div class="en">GOTHAM POCKET / ISSUE #01</div>
+    <p>把<strong>蝙蝠侠</strong>和<strong>小丑</strong>装进口袋。他们会住在哥谭的屋顶上，听你说话、吃你的爆米花，也会为了谁该值班吵起来。</p>
+    <p>这是一个可以真的装进 iPhone 的桌面小宠：离线运行，没有广告，没有内购。灵感来自两位老对手，画风是圆滚滚的。</p>
+    <div class="features">
+      <span>两只可切换的小宠</span><span>心情值</span><span>粒子特效</span><span>触感反馈</span><span>雨夜 &amp; 霓虹</span><span>本地存档</span>
+    </div>
+    <div class="preview-buttons">
+      <button type="button" class="bat" data-preview="batman">先看蝙蝠侠</button>
+      <button type="button" class="joke" data-preview="joker">看看小丑</button>
+    </div>
+    <div class="footnote">网页交互预览 · 真正的 App 由 SwiftUI 构建<br>Fan-made. Not affiliated with DC Comics.</div>
+  </aside>
+
+  <div class="device">
+    <div class="screen" id="screen" data-companion="batman">
+      <div class="sky">
+        <div class="stars" id="stars"></div>
+        <div class="moon"></div>
+        <div class="joker-glow"></div>
+        <div class="ha ha1">HA</div>
+        <div class="ha ha2">HA</div>
+        <div class="ha ha3">WHY SO SERIOUS?</div>
+        <div class="signal" aria-hidden="true">
+          <svg viewBox="0 0 100 60"><path d="M50 2C72 8 88 9 98 21L82 37 68 26 60 52 50 39 40 52 32 26 18 37 2 21 12 9 28 8 50 2Z"/></svg>
+        </div>
+        <svg class="skyline" viewBox="0 0 390 300" preserveAspectRatio="none" aria-hidden="true">
+          <g class="far">
+            <rect x="-10" y="118" width="47" height="182"/><rect x="32" y="92" width="36" height="208"/>
+            <rect x="64" y="142" width="55" height="158"/><rect x="112" y="78" width="31" height="222"/>
+            <rect x="140" y="126" width="49" height="174"/><rect x="184" y="150" width="43" height="150"/>
+            <rect x="222" y="96" width="39" height="204"/><rect x="256" y="136" width="56" height="164"/>
+            <rect x="306" y="110" width="40" height="190"/><rect x="342" y="150" width="58" height="150"/>
+          </g>
+          <g class="near">
+            <rect x="-16" y="212" width="76" height="88" rx="2"/><rect x="52" y="184" width="54" height="116" rx="2"/>
+            <rect x="100" y="226" width="73" height="74" rx="2"/><rect x="166" y="196" width="51" height="104" rx="2"/>
+            <rect x="210" y="238" width="80" height="62" rx="2"/><rect x="282" y="188" width="57" height="112" rx="2"/>
+            <rect x="332" y="220" width="74" height="80" rx="2"/>
+          </g>
+          <g class="trim">
+            <rect x="48" y="182" width="62" height="3"/><rect x="162" y="194" width="59" height="3"/>
+            <rect x="278" y="186" width="65" height="3"/><rect x="328" y="218" width="82" height="3"/>
+          </g>
+          <g class="win">
+            <rect x="62" y="200" width="4" height="6"/><rect x="76" y="200" width="4" height="6"/><rect x="90" y="200" width="4" height="6"/>
+            <rect x="62" y="220" width="4" height="6"/><rect x="90" y="220" width="4" height="6"/>
+            <rect x="180" y="210" width="4" height="6"/><rect x="194" y="210" width="4" height="6"/><rect x="208" y="210" width="4" height="6"/>
+            <rect x="180" y="232" width="4" height="6"/><rect x="208" y="232" width="4" height="6"/><rect x="180" y="254" width="4" height="6"/>
+            <rect x="298" y="204" width="4" height="6"/><rect x="314" y="204" width="4" height="6"/><rect x="330" y="204" width="4" height="6"/>
+            <rect x="298" y="226" width="4" height="6"/><rect x="330" y="226" width="4" height="6"/><rect x="314" y="248" width="4" height="6"/>
+            <rect x="348" y="240" width="4" height="6"/><rect x="366" y="240" width="4" height="6"/><rect x="348" y="262" width="4" height="6"/>
+          </g>
+        </svg>
+        <div class="rain" id="rain"></div>
+        <div class="vignette"></div>
+      </div>
+
+      <div class="statusbar">
+        <span id="clock">23:41</span>
+        <div class="icons">
+          <svg width="17" height="12" viewBox="0 0 17 12" aria-hidden="true"><g fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.5" y="6" width="3" height="6" rx="1"/><rect x="9" y="3.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="1" width="3" height="11" rx="1"/></g></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" aria-hidden="true"><path d="M8 10.6 10.2 8.2a3.1 3.1 0 0 0-4.4 0L8 10.6Zm0-4.2c1.5 0 2.9.6 3.9 1.7l1.2-1.3A7.7 7.7 0 0 0 8 4.8a7.7 7.7 0 0 0-5.1 2l1.2 1.3A5.5 5.5 0 0 1 8 6.4Zm0-3.9c2.4 0 4.6.9 6.2 2.5l1.2-1.3A11 11 0 0 0 8 .9 11 11 0 0 0 .6 3.7l1.2 1.3A8.9 8.9 0 0 1 8 2.5Z" fill="currentColor"/></svg>
+          <svg width="25" height="12" viewBox="0 0 25 12" aria-hidden="true"><rect x="0.5" y="0.5" width="21" height="11" rx="3.2" fill="none" stroke="currentColor" opacity=".5"/><rect x="2.5" y="2.5" width="16" height="7" rx="1.6" fill="currentColor"/><path d="M23 4v4c1.2-.3 1.8-1 1.8-2S24.2 4.3 23 4Z" fill="currentColor" opacity=".5"/></svg>
+        </div>
+      </div>
+      <div class="notch" aria-hidden="true"></div>
+
+      <div class="app">
+        <header class="header">
+          <div class="badge" aria-hidden="true">
+            <svg viewBox="0 0 100 60"><path d="M50 2C72 8 88 9 98 21L82 37 68 26 60 52 50 39 40 52 32 26 18 37 2 21 12 9 28 8 50 2Z"/></svg>
+            <span class="ha-badge">HA</span>
+          </div>
+          <div class="title-block">
+            <div class="eyebrow">GOTHAM POCKET</div>
+            <h1 class="title">哥谭口袋</h1>
+            <div class="tagline" id="tagline">哥谭屋顶的守夜人</div>
+          </div>
+          <button class="switch-pet" id="switchPet" type="button" aria-label="换班">
+            <span class="loop">↻</span>
+            <span id="switchLabel">换班 · 小丑</span>
+          </button>
+          <button class="gear" id="gear" type="button" aria-label="设置">
+            <svg viewBox="0 0 24 24"><path d="M19.4 13c.04-.33.06-.66.06-1s-.02-.67-.06-1l2.1-1.63a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.61-.22l-2.48 1a7.1 7.1 0 0 0-1.73-1l-.37-2.64A.5.5 0 0 0 13.94 2h-4a.5.5 0 0 0-.49.41L9.08 5.05a7.1 7.1 0 0 0-1.73 1l-2.48-1a.5.5 0 0 0-.61.22l-2 3.46a.5.5 0 0 0 .12.64L4.48 11a8.1 8.1 0 0 0 0 2l-2.1 1.63a.5.5 0 0 0-.12.64l2 3.46a.5.5 0 0 0 .61.22l2.48-1a7.1 7.1 0 0 0 1.73 1l.37 2.64a.5.5 0 0 0 .49.41h4a.5.5 0 0 0 .49-.41l.37-2.64a7.1 7.1 0 0 0 1.73-1l2.48 1a.5.5 0 0 0 .61-.22l2-3.46a.5.5 0 0 0-.12-.64L19.4 13ZM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7Z"/></svg>
+          </button>
+        </header>
+
+        <main class="stage">
+          <div class="speech-wrap">
+            <div class="speech" id="speech">
+              <div class="bubble-label" id="bubbleLabel">BATMAN SAYS</div>
+              <div class="bubble-text" id="bubbleText">今晚的哥谭，还算安静。</div>
+            </div>
+          </div>
+
+          <div class="pet-area">
+            <div class="pet-shadow"></div>
+            <div class="ledge"></div>
+            <div class="pet" id="pet" role="button" tabindex="0" aria-label="蝙蝠侠，轻点互动，长按逗他，可以拖动">
+              <div class="pet-bob">
+                <svg class="character batman active" id="batmanArt" viewBox="0 0 240 300" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="bCape" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#2d3546"/><stop offset="1" stop-color="#10141d"/></linearGradient>
+                    <linearGradient id="bBody" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#303a4b"/><stop offset="1" stop-color="#171d29"/></linearGradient>
+                    <linearGradient id="bHead" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#2a3447"/><stop offset="1" stop-color="#131924"/></linearGradient>
+                    <linearGradient id="bSkin" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f3cdb0"/><stop offset="1" stop-color="#dca07f"/></linearGradient>
+                  </defs>
+                  <g stroke="#05070c" stroke-width="4" stroke-linejoin="round">
+                    <path d="M86 148C48 190 30 228 44 258L62 246 78 264 94 246 110 264 126 246 142 264 158 246 178 264 196 258C210 228 192 190 154 148Z" fill="url(#bCape)"/>
+                    <g stroke-width="3.5">
+                      <rect x="94" y="226" width="21" height="40" rx="10" fill="#242c3b"/>
+                      <rect x="125" y="226" width="21" height="40" rx="10" fill="#242c3b"/>
+                      <rect x="84" y="254" width="40" height="22" rx="11" fill="#10151f"/>
+                      <rect x="116" y="254" width="40" height="22" rx="11" fill="#10151f"/>
+                    </g>
+                    <rect x="70" y="162" width="100" height="84" rx="32" fill="url(#bBody)"/>
+                    <path d="M80 184Q66 200 52 222" fill="none" stroke="#05070c" stroke-width="24" stroke-linecap="round"/>
+                    <path d="M80 184Q66 200 52 222" fill="none" stroke="#242c3b" stroke-width="19" stroke-linecap="round"/>
+                    <circle cx="52" cy="222" r="12" fill="#10151f"/>
+                    <path d="M160 184Q176 198 187 218" fill="none" stroke="#05070c" stroke-width="24" stroke-linecap="round"/>
+                    <path d="M160 184Q176 198 187 218" fill="none" stroke="#242c3b" stroke-width="19" stroke-linecap="round"/>
+                    <circle cx="187" cy="218" r="12" fill="#10151f"/>
+                    <rect x="77" y="215" width="86" height="15" rx="5" fill="#f4c84b" stroke-width="2.5"/>
+                    <g fill="#c79b2e" stroke="none"><rect x="84" y="218" width="12" height="9" rx="3"/><rect x="105" y="218" width="12" height="9" rx="3"/><rect x="126" y="218" width="12" height="9" rx="3"/><rect x="147" y="218" width="12" height="9" rx="3"/></g>
+                    <rect x="108" y="212" width="24" height="21" rx="5" fill="#f4c84b" stroke-width="2.5"/>
+                    <ellipse cx="120" cy="190.5" rx="21" ry="13.5" fill="#f4c84b" stroke-width="2.5"/>
+                    <path d="M120 183 126.6 185.4 129.1 188.1 124.6 190.9 122.6 194.8 120 192.2 117.4 194.8 115.4 190.9 110.9 188.1 113.4 185.4Z" fill="#111722" stroke="none"/>
+                    <path d="M84 92C78 62 70 38 67 24 86 52 100 67 111 77Z" fill="#1a2232"/>
+                    <path d="M156 92C162 62 170 38 173 24 154 52 140 67 129 77Z" fill="#1a2232"/>
+                    <ellipse cx="120" cy="120" rx="56" ry="56" fill="url(#bHead)"/>
+                    <path d="M84 105C101 96 139 96 156 105 158 127 154 141 146 148 137 165 103 165 94 148 86 141 82 126 84 105Z" fill="url(#bSkin)" stroke="#6d4b39" stroke-opacity=".55" stroke-width="1.5"/>
+                    <path d="M84 105Q120 96 156 105" fill="none" stroke="#05070c" stroke-width="4" stroke-linecap="round"/>
+                    <g class="eye-open" fill="#cfe7ff" stroke-width="1.8"><path d="M90 91 110 87 107 102 91 100Z"/><path d="M150 91 130 87 133 102 149 100Z"/></g>
+                    <g class="eye-closed" fill="none" stroke="#cfe7ff" stroke-width="3" stroke-linecap="round"><path d="M92 95Q101 99 110 94"/><path d="M130 94Q139 99 148 95"/></g>
+                    <path d="M120 124Q123 130 124 134" fill="none" stroke="#8c5c46" stroke-opacity=".7" stroke-width="2" stroke-linecap="round"/>
+                    <path d="M108 143Q120 148 132 143" fill="none" stroke="#6d4034" stroke-width="2.5" stroke-linecap="round"/>
+                    <ellipse cx="120" cy="154" rx="17" ry="4" fill="#fff" opacity=".08" stroke="none"/>
+                    <path d="M84 157Q101 174 120 178 139 174 156 157" fill="none" stroke="#05070c" stroke-width="5" stroke-linecap="round"/>
+                  </g>
+                </svg>
+
+                <svg class="character joker" id="jokerArt" viewBox="0 0 240 300" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="jHair" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#a6f06a"/><stop offset=".55" stop-color="#76d943"/><stop offset="1" stop-color="#3a8c2e"/></linearGradient>
+                    <linearGradient id="jBody" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#8b54b0"/><stop offset=".55" stop-color="#6a3a8e"/><stop offset="1" stop-color="#3e1e58"/></linearGradient>
+                    <linearGradient id="jSkin" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fffaf0"/><stop offset=".55" stop-color="#f6eddd"/><stop offset="1" stop-color="#e2d3be"/></linearGradient>
+                  </defs>
+                  <g stroke="#05070c" stroke-width="4" stroke-linejoin="round">
+                    <path d="M58 136 46 54 70 76 64 30 88 68 96 20 113 64 130 24 142 66 162 34 165 76 190 56 176 136Z" fill="url(#jHair)"/>
+                    <g stroke-width="3.5">
+                      <rect x="94" y="226" width="21" height="40" rx="10" fill="#3e1e58"/>
+                      <rect x="125" y="226" width="21" height="40" rx="10" fill="#3e1e58"/>
+                      <rect x="82" y="254" width="42" height="22" rx="11" fill="#1d3323"/>
+                      <rect x="116" y="254" width="42" height="22" rx="11" fill="#1d3323"/>
+                    </g>
+                    <rect x="70" y="162" width="100" height="84" rx="32" fill="url(#jBody)"/>
+                    <path d="M98 163 120 200 142 163Z" fill="#efe2c9"/>
+                    <path d="M84 165 108 165 120 197 120 238 82 238 78 184Z" fill="#3e8a3a" stroke-width="2.5"/>
+                    <path d="M156 165 132 165 120 197 120 238 158 238 162 184Z" fill="#337733" stroke-width="2.5"/>
+                    <path d="M120 169 105 160 105 178Z" fill="#8be05a" stroke-width="2"/>
+                    <path d="M120 169 135 160 135 178Z" fill="#8be05a" stroke-width="2"/>
+                    <circle cx="120" cy="169" r="4" fill="#2c6f2b" stroke-width="1.5"/>
+                    <g fill="#f07a2a" stroke="none"><circle cx="83" cy="181" r="5"/><circle cx="89" cy="184" r="5"/><circle cx="89" cy="191" r="5"/><circle cx="83" cy="194" r="5"/><circle cx="77" cy="191" r="5"/><circle cx="77" cy="184" r="5"/></g>
+                    <circle cx="83" cy="187.5" r="4" fill="#f4c84b" stroke="none"/>
+                    <path d="M80 184Q64 212 56 236" fill="none" stroke="#05070c" stroke-width="23" stroke-linecap="round"/>
+                    <path d="M80 184Q64 212 56 236" fill="none" stroke="#6a3a8e" stroke-width="18" stroke-linecap="round"/>
+                    <circle cx="56" cy="236" r="12" fill="#ede6d6" stroke-width="2.8"/>
+                    <path d="M160 184Q176 196 188 210" fill="none" stroke="#05070c" stroke-width="23" stroke-linecap="round"/>
+                    <path d="M160 184Q176 196 188 210" fill="none" stroke="#6a3a8e" stroke-width="18" stroke-linecap="round"/>
+                    <circle cx="188" cy="210" r="12" fill="#ede6d6" stroke-width="2.8"/>
+                    <path d="M42 239 63 231 72 257 51 266Z" fill="#f8f1dd" stroke-width="2"/>
+                    <path d="M57 248C55 243 49 243 49 246 49 250 57 252 57 248 57 252 65 250 65 246 65 243 59 243 57 248Z" fill="#c9314b" stroke="none"/>
+                    <ellipse cx="120" cy="120" rx="56" ry="56" fill="url(#jSkin)"/>
+                    <path d="M65 112C64 34 176 34 175 112L169 103 157 92 150 108 138 91 128 109 116 92 106 110 94 92 86 108 76 94Z" fill="url(#jHair)" stroke-width="3"/>
+                    <ellipse cx="87" cy="131" rx="13" ry="7" fill="#df4f62" opacity=".09" stroke="none"/>
+                    <ellipse cx="153" cy="131" rx="13" ry="7" fill="#df4f62" opacity=".09" stroke="none"/>
+                    <path d="M86 100Q99 93 111 95" fill="none" stroke="#2c6f2b" stroke-width="3" stroke-linecap="round"/>
+                    <path d="M129 94Q143 89 155 99" fill="none" stroke="#2c6f2b" stroke-width="3" stroke-linecap="round"/>
+                    <g class="eye-open">
+                      <ellipse cx="99" cy="110.5" rx="13" ry="9.5" fill="#f7f0c9" stroke="#221b24" stroke-width="2.2"/>
+                      <ellipse cx="141" cy="110.5" rx="13" ry="9.5" fill="#f7f0c9" stroke="#221b24" stroke-width="2.2"/>
+                      <circle cx="101.5" cy="110.5" r="4.5" fill="#62c13c" stroke="none"/><circle cx="143.5" cy="110.5" r="4.5" fill="#62c13c" stroke="none"/>
+                      <circle cx="101.5" cy="110.5" r="2" fill="#221b24" stroke="none"/><circle cx="143.5" cy="110.5" r="2" fill="#221b24" stroke="none"/>
+                      <circle cx="100" cy="109" r="1.2" fill="#fff" stroke="none"/><circle cx="142" cy="109" r="1.2" fill="#fff" stroke="none"/>
+                    </g>
+                    <g class="eye-closed" fill="none" stroke="#221b24" stroke-width="3" stroke-linecap="round"><path d="M89 110Q99 115 109 110"/><path d="M131 110Q141 115 151 110"/></g>
+                    <path d="M120 118 116 129Q120 132 123 130" fill="none" stroke="#9a8068" stroke-width="1.8" stroke-linecap="round"/>
+                    <path d="M79 136C98 174 142 174 161 136 144 151 96 151 79 136Z" fill="#651324"/>
+                    <path d="M91 140Q120 156 149 140 120 146 91 140Z" fill="#f3e8d2" stroke="none"/>
+                    <path d="M105 142 106 148M120 142 121 148M135 142 136 148" stroke="#9b7a64" stroke-opacity=".5" stroke-width="1"/>
+                    <path d="M78 135C98 172 142 172 162 135" fill="none" stroke="#df4f62" stroke-width="4" stroke-linecap="round"/>
+                    <path d="M78 133 68 128M78 139 67 139M162 133 172 128M162 139 173 139" fill="none" stroke="#df4f62" stroke-opacity=".8" stroke-width="2" stroke-linecap="round"/>
+                    <ellipse cx="93" cy="82" rx="9" ry="4.5" fill="#fff" opacity=".3" stroke="none"/>
+                  </g>
+                </svg>
+              </div>
+            </div>
+            <div class="fx" id="fx"></div>
+          </div>
+        </main>
+
+        <section class="deck">
+          <div class="status-row">
+            <div class="status-left">
+              <div class="name-row">
+                <span class="dot"></span>
+                <span class="pet-name" id="petName">蝙蝠侠</span>
+                <span class="mood-text" id="moodText">· 还不错</span>
+              </div>
+              <div class="moodbar"><div class="moodfill" id="moodFill"></div></div>
+            </div>
+            <span class="mood-score" id="moodScore">58</span>
+          </div>
+          <div class="actions">
+            <button class="action" id="feed" type="button"><span class="ico">🍿</span><span class="lbl">投喂</span><span class="sub">爆米花</span></button>
+            <button class="action" id="play" type="button"><span class="ico">👋</span><span class="lbl">逗一逗</span><span class="sub">陪他玩</span></button>
+          </div>
+          <p class="hint">轻点摸摸 · 长按逗他 · 还能拖着走</p>
+        </section>
+      </div>
+
+      <div class="sheet-layer" id="sheetLayer">
+        <div class="sheet-backdrop" id="sheetBackdrop"></div>
+        <div class="sheet">
+          <div class="sheet-head"><h2>屋顶设置</h2><button class="sheet-close" id="sheetClose" type="button" aria-label="关闭">×</button></div>
+          <div class="sheet-row"><span>雨夜模式</span><button class="switch on" id="rainToggle" type="button" aria-label="雨夜模式"></button></div>
+          <div class="sheet-row"><span>粒子特效</span><button class="switch on" id="effectsToggle" type="button" aria-label="粒子特效"></button></div>
+          <div class="sheet-row"><span>触感反馈</span><button class="switch on" id="hapticToggle" type="button" aria-label="触感反馈"></button></div>
+          <p class="sheet-note">交互预览。真正的 App 使用 SwiftUI 与 Canvas 绘制，支持 iOS 17+，所有数据只保存在本机。</p>
+          <button class="reset" id="reset" type="button">重置心情</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const screen = document.getElementById('screen');
+  const pet = document.getElementById('pet');
+  const bubble = document.getElementById('speech');
+  const bubbleText = document.getElementById('bubbleText');
+  const bubbleLabel = document.getElementById('bubbleLabel');
+  const moodFill = document.getElementById('moodFill');
+  const moodText = document.getElementById('moodText');
+  const moodScore = document.getElementById('moodScore');
+  const petName = document.getElementById('petName');
+  const tagline = document.getElementById('tagline');
+  const switchLabel = document.getElementById('switchLabel');
+  const fx = document.getElementById('fx');
+  const batArt = document.getElementById('batmanArt');
+  const jokerArt = document.getElementById('jokerArt');
+  const sheetLayer = document.getElementById('sheetLayer');
+
+  const data = {
+    batman: {
+      name: '蝙蝠侠', label: 'BATMAN SAYS', tagline: '哥谭屋顶的守夜人',
+      idle: ['今晚的哥谭，还算安静。','别站太靠边，风很大。','阿尔弗雷德说，我该多笑笑。','你听见蝙蝠灯亮了吗？','罗宾又偷吃了我的三明治。'],
+      tap: ['嗯？','我在听。','你挡住我的视线了。','……谢谢。'],
+      feed: ['……爆米花？就这一次。','高热量的东西。下不为例。','阿尔弗雷德不会同意这个夜宵。'],
+      play: ['认真点。……好吧，再来一次。','我可不常这样。','别告诉小丑。'],
+      special: ['好吧。五分钟。就五分钟。','哥谭可以等我一会儿。'],
+      full: ['吃不下了。真的。','再吃，披风就扣不上了。'],
+      arrival: '我来了。屋顶交给我。'
+    },
+    joker: {
+      name: '小丑', label: 'JOKER SAYS', tagline: '哥谭屋顶的麻烦制造者',
+      idle: ['嘿嘿……你终于来了。','为什么这么严肃？','蝙蝠仔又不理我了。','今晚的哥谭，真热闹。','我刚刚想到一个特别好笑的点子。'],
+      tap: ['戳我？胆子不小。','嘿嘿嘿……痒。','想听个笑话吗？','再戳一下，我就咬人。'],
+      feed: ['爆米花！我就知道你喜欢我。','再来点焦糖，别害羞。','蝙蝠仔不吃，那都是我的。'],
+      play: ['哈！再来一次！','你比我有趣。','小心，我笑点很低的。'],
+      special: ['我给你留了张牌。……别翻。','严肃脸不适合你。'],
+      full: ['停停停——我笑不出来了。','留着点肚子，等蝙蝠仔请客。'],
+      arrival: '换班时间到——想我了吗？'
+    }
+  };
+
+  const state = {
+    pet: location.hash.replace('#', '') === 'joker' ? 'joker' : 'batman',
+    mood: 58,
+    rain: true,
+    effects: true,
+    haptics: true
+  };
+
+  const rand = list => list[Math.floor(Math.random() * list.length)];
+  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+
+  function moodLabel(value) {
+    if (value < 25) return '有点低落';
+    if (value < 48) return '安静';
+    if (value < 70) return '还不错';
+    if (value < 88) return '心情很好';
+    return '开心到飞起';
+  }
+
+  function say(text) {
+    bubbleText.textContent = text;
+    bubble.classList.remove('pop');
+    void bubble.offsetWidth;
+    bubble.classList.add('pop');
+  }
+
+  function render() {
+    const d = data[state.pet];
+    screen.dataset.companion = state.pet;
+    batArt.classList.toggle('active', state.pet === 'batman');
+    jokerArt.classList.toggle('active', state.pet === 'joker');
+    bubbleLabel.textContent = d.label;
+    petName.textContent = d.name;
+    tagline.textContent = d.tagline;
+    switchLabel.textContent = `换班 · ${state.pet === 'batman' ? '小丑' : '蝙蝠侠'}`;
+    const value = Math.round(state.mood);
+    moodText.textContent = '· ' + moodLabel(value);
+    moodFill.style.width = value + '%';
+    moodScore.textContent = value;
+    pet.setAttribute('aria-label', `${d.name}，${moodLabel(value)}，轻点互动，长按逗他，可以拖动`);
+  }
+
+  function commit(delta) {
+    state.mood = clamp(state.mood + delta, 0, 100);
+    render();
+  }
+
+  function burst(kind) {
+    if (!state.effects) return;
+    const palette = state.pet === 'batman' ? ['#f4c84b', '#6f9fc9', '#ffffff'] : ['#8be05a', '#df4f62', '#d8b4ff'];
+    const symbols = kind === 'popcorn' ? ['🍿', '✦', '★'] : kind === 'hearts' ? ['♥', '✦', '♥'] : kind === 'laugh' ? ['HA!', '★', '✦'] : ['✦', '★', '✧'];
+    const pow = document.createElement('div');
+    pow.className = 'pow';
+    pow.textContent = kind === 'popcorn' ? 'NOM!' : kind === 'hearts' ? 'AWW' : kind === 'laugh' ? 'HA!' : kind === 'swap' ? 'SWAP!' : 'ZAP!';
+    fx.appendChild(pow);
+    setTimeout(() => pow.remove(), 950);
+
+    for (let i = 0; i < 12; i++) {
+      const el = document.createElement('span');
+      el.className = 'particle';
+      el.textContent = symbols[i % symbols.length];
+      el.style.color = palette[i % palette.length];
+      el.style.fontSize = (11 + (i % 4) * 4) + 'px';
+      fx.appendChild(el);
+      const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
+      const distance = 62 + (i % 4) * 18;
+      const x = Math.cos(angle) * distance;
+      const y = Math.sin(angle) * distance - 16;
+      el.animate([
+        { transform: 'translate(-50%,-50%) scale(.2)', opacity: 0 },
+        { transform: `translate(calc(-50% + ${x * .35}px), calc(-50% + ${y * .35}px)) scale(1.15)`, opacity: 1, offset: .25 },
+        { transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(.9)`, opacity: 0 }
+      ], { duration: 850 + (i % 3) * 80, easing: 'cubic-bezier(.16,.75,.25,1)' }).onfinish = () => el.remove();
+    }
+  }
+
+  function buzz(pattern) {
+    if (state.haptics && navigator.vibrate) navigator.vibrate(pattern);
+  }
+
+  function tapPet() {
+    commit(2);
+    say(rand(data[state.pet].tap));
+    burst('sparkle');
+    buzz(8);
+  }
+
+  function feedPet() {
+    if (state.mood >= 96) {
+      say(rand(data[state.pet].full));
+      burst('laugh');
+      return;
+    }
+    commit(15);
+    say(rand(data[state.pet].feed));
+    burst('popcorn');
+    buzz(18);
+  }
+
+  function playPet() {
+    commit(9);
+    say(rand(data[state.pet].play));
+    burst('hearts');
+    buzz([10, 30, 10]);
+  }
+
+  function ticklePet() {
+    commit(5);
+    say(rand(data[state.pet].special));
+    burst('laugh');
+    buzz(24);
+  }
+
+  function switchPet(next) {
+    state.pet = next || (state.pet === 'batman' ? 'joker' : 'batman');
+    render();
+    say(data[state.pet].arrival);
+    burst('swap');
+    buzz(14);
+  }
+
+  // Tap, long press, drag.
+  let pressTimer = null;
+  let startX = 0, startY = 0, dx = 0, dy = 0, dragging = false, longPressed = false, down = false;
+  const endPress = () => { clearTimeout(pressTimer); pressTimer = null; };
+
+  pet.addEventListener('pointerdown', e => {
+    if (e.button !== undefined && e.button !== 0) return;
+    down = true; dragging = false; longPressed = false;
+    startX = e.clientX; startY = e.clientY; dx = 0; dy = 0;
+    pet.classList.add('dragging');
+    pet.setPointerCapture?.(e.pointerId);
+    pressTimer = setTimeout(() => {
+      if (!down || dragging) return;
+      longPressed = true;
+      ticklePet();
+    }, 620);
+  });
+
+  pet.addEventListener('pointermove', e => {
+    if (!down) return;
+    const mx = e.clientX - startX;
+    const my = e.clientY - startY;
+    if (Math.abs(mx) + Math.abs(my) > 8) {
+      dragging = true;
+      endPress();
+    }
+    if (dragging) {
+      dx = clamp(mx * .62, -78, 78);
+      dy = clamp(my * .48, -58, 58);
+      pet.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx / 34}deg)`;
+    }
+  });
+
+  function release(e) {
+    if (!down) return;
+    down = false;
+    endPress();
+    pet.classList.remove('dragging');
+    pet.style.transform = '';
+    if (!dragging && !longPressed) tapPet();
+    dragging = false;
+    if (e && pet.hasPointerCapture?.(e.pointerId)) pet.releasePointerCapture(e.pointerId);
+  }
+  pet.addEventListener('pointerup', release);
+  pet.addEventListener('pointercancel', release);
+  pet.addEventListener('pointerleave', e => { if (down && e.buttons === 0) release(e); });
+  pet.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tapPet(); }
+  });
+
+  document.getElementById('feed').addEventListener('click', feedPet);
+  document.getElementById('play').addEventListener('click', playPet);
+  document.getElementById('switchPet').addEventListener('click', () => switchPet());
+  document.querySelectorAll('[data-preview]').forEach(btn => {
+    btn.addEventListener('click', () => switchPet(btn.dataset.preview));
+  });
+
+  // Settings sheet.
+  document.getElementById('gear').addEventListener('click', () => sheetLayer.classList.add('open'));
+  document.getElementById('sheetClose').addEventListener('click', () => sheetLayer.classList.remove('open'));
+  document.getElementById('sheetBackdrop').addEventListener('click', () => sheetLayer.classList.remove('open'));
+  document.getElementById('rainToggle').addEventListener('click', e => {
+    state.rain = !state.rain;
+    e.currentTarget.classList.toggle('on', state.rain);
+    screen.classList.toggle('rain-off', !state.rain);
+  });
+  document.getElementById('effectsToggle').addEventListener('click', e => {
+    state.effects = !state.effects;
+    e.currentTarget.classList.toggle('on', state.effects);
+    if (!state.effects) fx.innerHTML = '';
+  });
+  document.getElementById('hapticToggle').addEventListener('click', e => {
+    state.haptics = !state.haptics;
+    e.currentTarget.classList.toggle('on', state.haptics);
+  });
+  document.getElementById('reset').addEventListener('click', () => {
+    state.mood = 58;
+    render();
+    say('屋顶的灯，重新亮起来了。');
+    burst('sparkle');
+    sheetLayer.classList.remove('open');
+  });
+
+  // Stars and rain.
+  const stars = document.getElementById('stars');
+  for (let i = 0; i < 38; i++) {
+    const star = document.createElement('i');
+    star.className = 'star';
+    star.style.left = ((i * 73) % 100) + '%';
+    star.style.top = ((i * 37) % 52) + '%';
+    star.style.width = star.style.height = (1 + (i % 3) * .7) + 'px';
+    star.style.animationDelay = (-(i % 9) * .4) + 's';
+    star.style.opacity = (.18 + (i % 4) * .08).toFixed(2);
+    stars.appendChild(star);
+  }
+  const rain = document.getElementById('rain');
+  for (let i = 0; i < 42; i++) {
+    const drop = document.createElement('i');
+    drop.style.left = ((i * 47) % 100) + '%';
+    drop.style.animationDelay = (-(i % 15) * .22) + 's';
+    drop.style.animationDuration = (1.1 + (i % 7) * .18) + 's';
+    drop.style.opacity = (.45 + (i % 4) * .13).toFixed(2);
+    rain.appendChild(drop);
+  }
+
+  const now = new Date();
+  document.getElementById('clock').textContent = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+  render();
+  setTimeout(() => say(data[state.pet].idle[0]), 250);
+})();
+</script>
+</body>
+</html>
